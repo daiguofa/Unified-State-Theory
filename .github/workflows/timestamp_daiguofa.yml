@@ -1,30 +1,40 @@
-# 这是一个工作流文件，名字叫 Timestamp.yml
+# .github/workflows/timestamp_daiguofa.yml
 name: Add Time Stamp
-# 触发条件：当你向 main 分支推送代码时，自动运行
+
 on:
-  push:
-    branches:
-- main
-# 具体执行的任务
+  push:
+    branches:
+      - main
+
 jobs:
-  timestamp_job:
-    runs-on: ubuntu-latest # 使用免费的 Linux 虚拟机
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3 # 第一步：把你的仓库代码下载到虚拟机里        
-      - name: Get Current Time and Save
-        run: |
-# 获取当前的北京时间（精确到秒）
-          echo "Timestamp: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" > timestamp.txt
-          echo "Commit Hash: ${{ github.sha }}" >> timestamp.txt          
-      - name: Commit the timestamp
-        run: |
- # 配置 git 身份（随便填，只是为了让 git 能提交）
-          git config --global user.name 'github-actions'
-          git config --global user.email 'actions@github.com'
- # 把刚才生成的时间文件加到仓库里
-          git add timestamp.txt
-# 提交更改，-m 后面是提交说明
-          git commit -m "Auto add timestamp [${{ github.sha }}]"
-          # 推送到仓库
-          git push
+  timestamp_job:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 给 workflow 授予写权限（关键）
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 拉取完整历史，避免浅克隆问题
+
+      - name: Get Current Beijing Time and Save
+        run: |
+          # 获取北京时间（东八区）
+          TZ='Asia/Shanghai' date +'%Y-%m-%d %H:%M:%S %z' > timestamp.txt
+          echo "Commit Hash: ${{ github.sha }}" >> timestamp.txt
+
+      - name: Commit the timestamp
+        run: |
+          # 配置 Git 身份
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # 检查是否有变更
+          git add timestamp.txt
+          git status
+          
+          # 提交变更（加上 [skip ci] 避免循环触发）
+          git commit -m "Auto add timestamp [skip ci] [${{ github.sha }}]" || exit 0
+          
+          # 推送到仓库
+          git push
