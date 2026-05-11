@@ -4,7 +4,7 @@ name: Add Time Stamp
 on:
   push:
     branches:
-      - main
+- main
 # 具体执行的任务
 jobs:
   timestamp_job:
