@@ -10,31 +10,24 @@ jobs:
   timestamp_job:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 给 workflow 授予写权限（关键）
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # 拉取完整历史，避免浅克隆问题
+          fetch-depth: 0
 
-      - name: Get Current Beijing Time and Save
+      - name: Append New Time Stamp (历史记录模式)
         run: |
-          # 获取北京时间（东八区）
-          TZ='Asia/Shanghai' date +'%Y-%m-%d %H:%M:%S %z' > timestamp.txt
-          echo "Commit Hash: ${{ github.sha }}" >> timestamp.txt
+          echo "--- 新提交 ---" >> timestamp.txt
+          echo "时间: $(TZ='Asia/Shanghai' date +'%Y-%m-%d %H:%M:%S')" >> timestamp.txt
+          echo "提交: ${{ github.sha }}" >> timestamp.txt
+          echo "" >> timestamp.txt
 
-      - name: Commit the timestamp
+      - name: Commit & Push
         run: |
-          # 配置 Git 身份
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          
-          # 检查是否有变更
           git add timestamp.txt
-          git status
-          
-          # 提交变更（加上 [skip ci] 避免循环触发）
-          git commit -m "Auto add timestamp [skip ci] [${{ github.sha }}]" || exit 0
-          
-          # 推送到仓库
+          git commit -m "Auto update timestamp [skip ci]" || exit 0
           git push
