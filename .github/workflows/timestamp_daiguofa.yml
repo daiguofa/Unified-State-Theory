@@ -14,17 +14,17 @@ jobs:
         uses: actions/checkout@v3 # 第一步：把你的仓库代码下载到虚拟机里        
       - name: Get Current Time and Save
         run: |
-          # 获取当前的北京时间（精确到秒）
+# 获取当前的北京时间（精确到秒）
           echo "Timestamp: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" > timestamp.txt
           echo "Commit Hash: ${{ github.sha }}" >> timestamp.txt          
       - name: Commit the timestamp
         run: |
-          # 配置 git 身份（随便填，只是为了让 git 能提交）
-          git config --global user.name 'github-actions'
-          git config --global user.email 'actions@github.com'
-          # 把刚才生成的时间文件加到仓库里
+ # 配置 git 身份（随便填，只是为了让 git 能提交）
+          git config --global user.name 'github-actions'
+          git config --global user.email 'actions@github.com'
+ # 把刚才生成的时间文件加到仓库里
           git add timestamp.txt
-          # 提交更改，-m 后面是提交说明
+# 提交更改，-m 后面是提交说明
           git commit -m "Auto add timestamp [${{ github.sha }}]"
           # 推送到仓库
           git push
